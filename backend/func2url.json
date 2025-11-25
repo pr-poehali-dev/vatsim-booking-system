@@ -1,0 +1,6 @@
+{
+  "events": "https://functions.poehali.dev/ae995dd8-5e16-43d8-a83d-3774d820c907",
+  "auth": "https://functions.poehali.dev/4094fd02-32b8-41ae-8ea2-c41d18665c10",
+  "flights": "https://functions.poehali.dev/d85bdbf1-b984-4bcc-a672-0a49f5f5dfbf",
+  "pilots": "https://functions.poehali.dev/19aa3fea-92f1-468e-ac32-2c9f10433792"
+}

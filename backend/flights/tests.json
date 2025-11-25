@@ -1,0 +1,19 @@
+{
+  "tests": [
+    {
+      "name": "Book flight",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "action": "book",
+        "flightId": "1",
+        "pilotPid": "1234567"
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "success": true
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}

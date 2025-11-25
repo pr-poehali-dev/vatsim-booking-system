@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import HomePage from '@/components/HomePage';
 import AuthPages from '@/components/AuthPages';
 import AdminDashboard from '@/components/AdminDashboard';
 import PilotDashboard from '@/components/PilotDashboard';
+import { login, getEvents, getPilots } from '@/lib/api';
 
 type Event = {
   id: string;
@@ -50,53 +51,34 @@ export default function Index() {
   const [page, setPage] = useState<'home' | 'pilot-login' | 'pilot-dashboard' | 'admin-login' | 'admin-dashboard' | 'admin-register'>('home');
   const [currentUser, setCurrentUser] = useState<Pilot | null>(null);
   const [currentAdmin, setCurrentAdmin] = useState<Admin | null>(null);
-  
-  const [pilots] = useState<Pilot[]>([
-    { pid: '1234567', firstName: 'Иван', lastName: 'Петров', password: 'pilot123', rating: 75, completedFlights: 8, failedFlights: 1 },
-    { pid: '7654321', firstName: 'Мария', lastName: 'Сидорова', password: 'pilot456', rating: 30, completedFlights: 3, failedFlights: 0 },
-  ]);
+  const [pilots, setPilots] = useState<Pilot[]>([]);
+  const [admins, setAdmins] = useState<Admin[]>([]);
+  const [events, setEvents] = useState<Event[]>([]);
 
-  const [admins] = useState<Admin[]>([
-    { pid: '1437139', firstName: 'Главный', lastName: 'Админ', password: '12345' },
-  ]);
+  useEffect(() => {
+    loadEvents();
+    loadPilots();
+  }, []);
 
-  const [events] = useState<Event[]>([
-    {
-      id: '1',
-      name: 'Полёт в Сочи',
-      date: '2025-12-01',
-      startTime: '12:00',
-      endTime: '18:00',
-      description: 'Массовый вылет в Сочи',
-      banner: '✈️',
-      flights: [
-        { id: '1', flightNumber: 'AFL123', type: 'departure', time: '12:30', aircraft: 'A320', aircraftType: 'plane', route: 'USSS-URSS', description: 'Регулярный рейс', status: 'pending' },
-        { id: '2', flightNumber: 'AFL456', type: 'arrival', time: '15:00', aircraft: 'B737', aircraftType: 'plane', route: 'UUEE-USSS', description: 'Без особенностей', status: 'pending' },
-      ]
-    },
-    {
-      id: '2',
-      name: 'Вертолётная миссия',
-      date: '2025-12-05',
-      startTime: '09:00',
-      endTime: '12:00',
-      description: 'Тренировочные полёты на вертолётах',
-      banner: '🚁',
-      flights: [
-        { id: '3', flightNumber: 'HEL001', type: 'departure', time: '09:30', aircraft: 'Mi-8', aircraftType: 'helicopter', route: 'USSS-местность', description: 'Патрулирование', status: 'pending' },
-      ]
-    }
-  ]);
+  const loadEvents = async () => {
+    const data = await getEvents();
+    setEvents(data.events);
+  };
 
-  const handlePilotLogin = (e: React.FormEvent<HTMLFormElement>) => {
+  const loadPilots = async () => {
+    const data = await getPilots();
+    setPilots(data.pilots);
+  };
+
+  const handlePilotLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const pid = formData.get('pid') as string;
     const password = formData.get('password') as string;
     
-    const pilot = pilots.find(p => p.pid === pid && p.password === password);
-    if (pilot) {
-      setCurrentUser(pilot);
+    const result = await login('pilot', pid, password);
+    if (result.success) {
+      setCurrentUser(result.user);
       setPage('pilot-dashboard');
       toast.success('Вход выполнен успешно!');
     } else {
@@ -104,15 +86,15 @@ export default function Index() {
     }
   };
 
-  const handleAdminLogin = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleAdminLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const pid = formData.get('pid') as string;
     const password = formData.get('password') as string;
     
-    const admin = admins.find(a => a.pid === pid && a.password === password);
-    if (admin) {
-      setCurrentAdmin(admin);
+    const result = await login('admin', pid, password);
+    if (result.success) {
+      setCurrentAdmin(result.user);
       setPage('admin-dashboard');
       toast.success('Вход в админ-панель выполнен');
     } else {
@@ -163,6 +145,10 @@ export default function Index() {
         onLogout={() => {
           setCurrentUser(null);
           setPage('home');
+        }}
+        onRefresh={() => {
+          loadEvents();
+          loadPilots();
         }}
       />
     );

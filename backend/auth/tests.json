@@ -1,0 +1,39 @@
+{
+  "tests": [
+    {
+      "name": "Pilot login success",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "type": "pilot",
+        "pid": "1234567",
+        "password": "pilot123"
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "success": true,
+        "user": {
+          "pid": "string",
+          "firstName": "string",
+          "lastName": "string"
+        }
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Admin login success",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "type": "admin",
+        "pid": "1437139",
+        "password": "12345"
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "success": true
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}

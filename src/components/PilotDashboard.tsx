@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import Icon from '@/components/ui/icon';
 import { toast } from 'sonner';
+import { bookFlight, cancelBooking } from '@/lib/api';
 
 type Pilot = {
   pid: string;
@@ -46,6 +47,7 @@ type PilotDashboardProps = {
   pilots: Pilot[];
   events: Event[];
   onLogout: () => void;
+  onRefresh: () => void;
 };
 
 const getRankBadge = (rating: number) => {
@@ -66,7 +68,30 @@ const getRatingColor = (rating: number) => {
   return 'bg-green-500';
 };
 
-export default function PilotDashboard({ currentUser, pilots, events, onLogout }: PilotDashboardProps) {
+export default function PilotDashboard({ currentUser, pilots, events, onLogout, onRefresh }: PilotDashboardProps) {
+  
+  const handleBookFlight = async (flightId: string) => {
+    if (!currentUser) return;
+    const result = await bookFlight(flightId, currentUser.pid);
+    if (result.success) {
+      toast.success('Рейс забронирован!');
+      onRefresh();
+    } else {
+      toast.error(result.error || 'Не удалось забронировать рейс');
+    }
+  };
+
+  const handleCancelBooking = async (flightId: string) => {
+    if (!currentUser) return;
+    const result = await cancelBooking(flightId, currentUser.pid);
+    if (result.success) {
+      toast.success('Бронь отменена');
+      onRefresh();
+    } else {
+      toast.error(result.error || 'Не удалось отменить бронь');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 p-8">
       <div className="flex justify-between items-center mb-8">
@@ -187,14 +212,14 @@ export default function PilotDashboard({ currentUser, pilots, events, onLogout }
                                 <div className="ml-4">
                                   {!flight.bookedBy ? (
                                     <Button 
-                                      onClick={() => toast.success(`Рейс ${flight.flightNumber} забронирован!`)}
+                                      onClick={() => handleBookFlight(flight.id)}
                                       className="bg-cyan-600 hover:bg-cyan-500"
                                     >
                                       Забронировать
                                     </Button>
                                   ) : (
                                     <Button 
-                                      onClick={() => toast.success(`Бронь рейса ${flight.flightNumber} отменена`)}
+                                      onClick={() => handleCancelBooking(flight.id)}
                                       variant="outline"
                                       className="border-red-500 text-red-400"
                                     >

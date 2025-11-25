@@ -1,0 +1,14 @@
+{
+  "tests": [
+    {
+      "name": "Get pilots rating",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "pilots": "array"
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}
